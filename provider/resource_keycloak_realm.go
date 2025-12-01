@@ -582,6 +582,11 @@ func resourceKeycloakRealm() *schema.Resource {
 										Optional: true,
 										Default:  false,
 									},
+									"max_temporary_lockouts": { //Max Temporary Lockouts
+										Type:     schema.TypeInt,
+										Optional: true,
+										Default:  0,
+									},
 									"max_login_failures": { //failureFactor
 										Type:     schema.TypeInt,
 										Optional: true,
@@ -1080,6 +1085,7 @@ func getRealmFromData(data *schema.ResourceData, keycloakVersion *version.Versio
 			bruteForceDetectionSettings := bruteForceDetectionConfig[0].(map[string]interface{})
 			realm.BruteForceProtected = true
 			realm.PermanentLockout = bruteForceDetectionSettings["permanent_lockout"].(bool)
+			realm.MaxTemporaryLockouts = bruteForceDetectionSettings["max_temporary_lockouts"].(int)
 			realm.FailureFactor = bruteForceDetectionSettings["max_login_failures"].(int)
 			realm.WaitIncrementSeconds = bruteForceDetectionSettings["wait_increment_seconds"].(int)
 			realm.QuickLoginCheckMilliSeconds = bruteForceDetectionSettings["quick_login_check_milli_seconds"].(int)
@@ -1258,6 +1264,7 @@ func setDefaultSecuritySettingHeaders(realm *keycloak.Realm) {
 func setDefaultSecuritySettingsBruteForceDetection(realm *keycloak.Realm) {
 	realm.BruteForceProtected = false
 	realm.PermanentLockout = false
+	realm.MaxTemporaryLockouts = 0
 	realm.FailureFactor = 30
 	realm.WaitIncrementSeconds = 60
 	realm.QuickLoginCheckMilliSeconds = 1000
@@ -1461,6 +1468,7 @@ func setRealmData(data *schema.ResourceData, realm *keycloak.Realm, keycloakVers
 func getBruteForceDetectionSettings(realm *keycloak.Realm) map[string]interface{} {
 	bruteForceDetectionSettings := make(map[string]interface{})
 	bruteForceDetectionSettings["permanent_lockout"] = realm.PermanentLockout
+	bruteForceDetectionSettings["max_temporary_lockouts"] = realm.MaxTemporaryLockouts
 	bruteForceDetectionSettings["max_login_failures"] = realm.FailureFactor
 	bruteForceDetectionSettings["wait_increment_seconds"] = realm.WaitIncrementSeconds
 	bruteForceDetectionSettings["quick_login_check_milli_seconds"] = realm.QuickLoginCheckMilliSeconds
